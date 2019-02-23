@@ -1,6 +1,25 @@
 # DyakonovAlex_microservices
 DyakonovAlex microservices repository
 
+## Homework 13
+
+### Сделано
+
+- Создан новый проект docker-232609 
+- Сконфигурирован gcloud для нового проекта docker
+- Получен файл с аутентификационными данными gcloud auth application-default login
+- Запущен докер хост в GCP
+- Добавлен Dockerfile - текстовое описание нашего образа
+- Добавлен mongod.conf - подготовленный конфиг для mongodb
+- Добавлен db_config - содержит переменную окружения со ссылкой на mongodb
+- Добавлен start.sh - скрипт запуска приложения
+- Собран образ
+- Запущен контейнер
+- Настроен firewall
+- Настроена работа с Docker hub
+- Образ загружен на Docker hub
+
+
 ## Homework 12
 
 - Настроена интеграция с travis-ci по аналогии с репозиторием infra
