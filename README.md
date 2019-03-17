@@ -72,23 +72,6 @@ sudo docker exec -it gitlab-runner gitlab-runner register --run-untagged --locke
 - Добавлена директива, которая не позволяет выкатить на staging и production код,не помеченный с помощью тэга в git (only: - /^\d+.\d+.\d+/)
 - Добавлен job, который определяет динамическое окружение для каждой ветки в репозитории, кроме ветки master
 
-
-branch review:
-  stage: review
-  script: echo "Deploy to $CI_ENVIRONMENT_SLUG"
-  environment:
-   name: branch/$CI_COMMIT_REF_NAME
-   url: http://$CI_ENVIRONMENT_SLUG.example.com
-  only:
-    - branches
-  except:
-    - master
-
-
-git commit -a -m ‘#4 add logout button to profile page’
-git tag 2.4.10
-git push gitlab gitlab-ci-1 --tags
-
 ## Homework 15
 
 ### Работа с сетью в docker
