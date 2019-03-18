@@ -2,6 +2,76 @@
 
 DyakonovAlex microservices repository
 
+## Homework 16 Устройство Gitlab CI. Построение процесса непрерывной поставки
+
+### Создана виртуальная машина
+
+```bash
+docker-machine create --driver google \
+--google-machine-image https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/family/ubuntu-1604-lts \
+--google-machine-type n1-standard-1 \
+--google-zone europe-west1-b \
+--google-disk-size 70 \
+--google-project docker-232609 \
+--google-tags http-server,https-server \
+gitlab-host
+
+eval $(docker-machine env gitlab-host)
+```
+
+### Подготавливаем окружение
+
+```bash
+docker-machine ssh gitlab-host
+sudo mkdir -p /srv/gitlab/config /srv/gitlab/data /srv/gitlab/logs
+cd /srv/gitlab
+sudo touch docker-compose.yml
+sudo nano docker-compose.yml
+    web:
+    image: 'gitlab/gitlab-ce:latest'
+    restart: always
+    hostname: 'gitlab.example.com'
+    environment:
+        GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://35.205.91.233'
+    ports:
+        - '80:80'
+        - '443:443'
+        - '2222:22'
+    volumes:
+        - '/srv/gitlab/config:/etc/gitlab'
+        - '/srv/gitlab/logs:/var/log/gitlab'
+        - '/srv/gitlab/data:/var/opt/gitlab'
+
+sudo apt install docker-compose
+sudo docker-compose up -d
+```
+
+- Создана группа, проект и загружено содержимое репозиторя microservices  
+- Добавлен файл .gitlab-ci.yml  
+- Токен m_8zx_2uMiM17sizxR5v
+- Запущен и зарегистрирован gitlab-runner
+
+```bash
+
+sudo docker run -d --name gitlab-runner --restart always \
+-v /srv/gitlab-runner/config:/etc/gitlab-runner \
+-v /var/run/docker.sock:/var/run/docker.sock \
+gitlab/gitlab-runner:latest
+
+sudo docker exec -it gitlab-runner gitlab-runner register --run-untagged --locked=false
+```
+
+- Паплайн запустился
+- Добавлен исходный код reddit в репозиторий
+- Изменено описание пайплайна в .gitlab-ci.yml
+- Добавлен simpletest.rb в папку reddit
+- Добавлен gem 'rack-test'
+- Добавлено dev окружение, результат виден в Opeations → Environments
+- Добавлены stage и production окружения
+- Добавлена директива, которая не позволяет выкатить на staging и production код,не помеченный с помощью тэга в git (only: - /^\d+.\d+.\d+/)
+- Добавлен job, который определяет динамическое окружение для каждой ветки в репозитории, кроме ветки master
+
 ## Homework 15
 
 ### Работа с сетью в docker
