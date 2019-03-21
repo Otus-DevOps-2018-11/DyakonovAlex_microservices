@@ -2,6 +2,60 @@
 
 DyakonovAlex microservices repository
 
+## Homework 17 Введение в мониторинг. Модели и принципы работы систем мониторинга  
+
+### Подготовка окружения
+
+- Создано правило фаервола для Prometheus и Puma, Docker хост в GCE и настроено локальное окружение на работу с ним
+
+```bash
+gcloud compute firewall-rules create prometheus-default --allow tcp:9090
+gcloud compute firewall-rules create puma-default --allow tcp:9292
+
+export GOOGLE_PROJECT=docker-232609
+
+# create docker host
+docker-machine create --driver google \
+--google-machine-image https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/family/ubuntu-1604-lts \
+--google-machine-type n1-standard-1 \
+--google-zone europe-west1-b \
+docker-host
+
+# configure local env
+eval $(docker-machine env docker-host)
+
+docker run --rm -p 9090:9090 -d --name prometheus  prom/prometheus
+docker-machine ip docker-host #34.76.29.42
+docker stop prometheus
+```
+
+- Запущен контейнер prometheus
+
+```bash
+docker-machine ssh docker-host
+docker run --rm -p 9090:9090 -d --name prometheus  prom/prometheus:v2.1.0
+
+```
+
+- Переупорядочена структура директорий
+- Создана директория monitoring, добавлен dockerfile для создания настроенного образа prometheus, собран образ, созданы образы приложений
+
+```bash
+export USER_NAME=happydyakonov
+docker build -t $USER_NAME/prometheus .
+for i in ui post-py comment; do cd src/$i; bash docker_build.sh; cd -; done
+```
+
+- Добавлена секция запуска prometheus в docker-compose.  
+- Добавлена секция networks в определение сервиса prometheus в docker-compose
+- Запущены сервисы с помощью docker-compose  
+- Проверно, что указанные в кофнигурации endpoints в состоянии UP  
+- Протестировано реагирование графиков на отключение сервисов  
+- Добавлен запуск node exporter в docker-compose для сбора информации о хосте  
+- Проверен мониторинг
+- Образы загружены в [docker registry](https://hub.docker.com/u/happydyakonov)  
+
+
 ## Homework 16 Устройство Gitlab CI. Построение процесса непрерывной поставки
 
 ### Создана виртуальная машина
