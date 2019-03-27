@@ -289,7 +289,7 @@
       ]
     }
   ],
-  "refresh": false,
+  "refresh": "10s",
   "schemaVersion": 16,
   "style": "dark",
   "tags": [],
@@ -297,8 +297,8 @@
     "list": []
   },
   "time": {
-    "from": "2019-03-26T19:57:51.631Z",
-    "to": "2019-03-26T20:12:51.631Z"
+    "from": "now-15m",
+    "to": "now"    
   },
   "timepicker": {
     "refresh_intervals": [
