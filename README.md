@@ -92,6 +92,26 @@ docker-compose -f docker-compose-monitoring.yml up -d
 ### Алертинг  
 
 - Добавлен alertmanager и конфиги для него.  
+- Добавлен запуск alertmanager. Открыт порт.  
+
+```bash
+gcloud compute firewall-rules create alertmanager-default --allow tcp:9093
+
+```
+
+- Собран образ alertmanager
+
+```bash
+docker build -t $USER_NAME/alertmanager .
+```
+
+- Создан файл alerts.yml в директории prometheus
+- Добавлена операция копирования данного файла в Dockerfile
+- Добавлена информация о правилах, в конфиг Prometheus
+- Пересобран образ Prometheus
+- Пересоздана Docker инфраструктура мониторинга
+- Проверена работа алерта
+- Образы загружены в [docker registry](https://hub.docker.com/u/happydyakonov)
 
 ## Homework 17 Введение в мониторинг. Модели и принципы работы систем мониторинга  
 

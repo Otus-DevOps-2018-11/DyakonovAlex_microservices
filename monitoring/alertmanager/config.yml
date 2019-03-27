@@ -1,5 +1,5 @@
 global:
-  slack_api_url: 'https://hooks.slack.com/services/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'
+  slack_api_url: 'https://hooks.slack.com/services/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'
 
 route:
   receiver: 'slack-notifications'
@@ -7,4 +7,4 @@ route:
 receivers:
   - name: 'slack-notifications'
     slack_configs:
-      - channel: '#userchannel'
+      - channel: '#aleksey_dyakonov'
