@@ -1,14 +1,15 @@
-FROM ruby:2.2
-RUN apt-get update -qq && apt-get install -y build-essential
-
+FROM alpine:3.9 as builder
 ENV APP_HOME /app
-RUN mkdir $APP_HOME
 WORKDIR $APP_HOME
 
 COPY Gemfile* $APP_HOME/
 
-RUN bundle install 
+ENV RUBY_VERSION 2.5.3-r1
 
+RUN apk --no-cache add ruby="$RUBY_VERSION" ruby-bigdecimal="$RUBY_VERSION" ruby-bundler=1.17.1-r0 ruby-dev="$RUBY_VERSION" ruby-json="$RUBY_VERSION" make=4.2.1-r2 gcc=8.2.0-r2 libc-dev=0.7.1-r0 && \
+  bundle install && \
+  rm -rf /root/.bundle && \
+  apk --no-cache del make gcc libc-dev ruby-dev
 COPY . $APP_HOME
 
 ENV COMMENT_DATABASE_HOST comment_db
