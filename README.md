@@ -2,6 +2,117 @@
 
 DyakonovAlex microservices repository
 
+## Homework 18 Мониторинг приложения и инфраструктуры
+
+### Подготовка окружения
+
+```bash
+export GOOGLE_PROJECT=docker-232609
+
+# Создать докер хост
+docker-machine create --driver google \
+    --google-machine-image https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/family/ubuntu-1604-lts \
+    --google-machine-type n1-standard-1 \
+    --google-zone europe-west1-b \
+    docker-host
+
+# Настроить докер клиент на удаленный докер демон
+eval $(docker-machine env docker-host)
+
+# Переключение на локальный докер
+# eval $(docker-machine env --unset)
+
+docker-machine ip docker-host #35.241.242.123
+
+# docker-machine rm docker-host
+
+```
+
+### Мониторинг Docker контейнеров  
+
+- Запуск мониторинга вынесен в отдельный compose-файл. В makefile внесены нужные изменения.
+
+```bash
+docker-compose up -d
+docker-compose -f docker-compose-monitoring.yml up -d
+```
+
+- Добавлен запуск cAdvisor. Открыт порт для его веб-интерфейса. Проверено, что метрики собираются.
+
+```bash
+gcloud compute firewall-rules create cadvisor-default --allow tcp:8080
+
+```
+
+### Визуализация метрик  
+
+- Добавлен запуск Grafana. Открыт порт.  
+
+```bash
+gcloud compute firewall-rules create grafana-default --allow tcp:3000
+
+```
+
+- Запущен новый сервис Grafana
+
+```bash
+docker-compose -f docker-compose-monitoring.yml up -d grafana
+
+```
+
+- Скачан и импортирован дашборд
+
+### Сбор метрик приложения  
+
+- Добвлена информация о post сервисе в конфигурацию Prometheus
+- Пересобран образ Prometheus с обновленной конфигурацией
+
+```bash
+docker build -t $USER_NAME/prometheus .
+```
+
+- Пересоздана Docker инфраструктура мониторинга
+
+```bash
+docker-compose -f docker-compose-monitoring.yml down
+docker-compose -f docker-compose-monitoring.yml up -d
+```
+
+- Создана панель для метрик приложения.  
+- Использована для первого графика ```rate(ui_request_count[1m])```
+- Использована функция ```rate(ui_request_count{http_status=~"^[45].*"}[1m])``` для второго графика
+- Ознакомлен с гистограммами ```ui_request_response_time_bucket{path="/"}```
+- Добавлена панель с перцентилем ```histogram_quantile(0.95, sum(rate(ui_request_response_time_bucket[5m])) by (le))```
+- Панель экспортирована в файл.  
+
+### Сбор метрик бизнес логики  
+
+- Добавлена и экспортирован панель Business_Logic_Monitoring ```rate(post_count[1h])``` ```rate(comment_count[1h])```
+
+### Алертинг  
+
+- Добавлен alertmanager и конфиги для него.  
+- Добавлен запуск alertmanager. Открыт порт.  
+
+```bash
+gcloud compute firewall-rules create alertmanager-default --allow tcp:9093
+
+```
+
+- Собран образ alertmanager
+
+```bash
+docker build -t $USER_NAME/alertmanager .
+```
+
+- Создан файл alerts.yml в директории prometheus
+- Добавлена операция копирования данного файла в Dockerfile
+- Добавлена информация о правилах, в конфиг Prometheus
+- Пересобран образ Prometheus
+- Пересоздана Docker инфраструктура мониторинга
+- Проверена работа алерта
+- Образы загружены в [docker registry](https://hub.docker.com/u/happydyakonov)
+
 ## Homework 17 Введение в мониторинг. Модели и принципы работы систем мониторинга  
 
 ### Подготовка окружения
@@ -49,7 +160,7 @@ for i in ui post-py comment; do cd src/$i; bash docker_build.sh; cd -; done
 - Добавлена секция запуска prometheus в docker-compose.  
 - Добавлена секция networks в определение сервиса prometheus в docker-compose
 - Запущены сервисы с помощью docker-compose  
-- Проверно, что указанные в кофнигурации endpoints в состоянии UP  
+- Проверено, что указанные в конфигурации endpoints в состоянии UP  
 - Протестировано реагирование графиков на отключение сервисов  
 - Добавлен запуск node exporter в docker-compose для сбора информации о хосте  
 - Проверен мониторинг
