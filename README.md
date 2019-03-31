@@ -2,6 +2,77 @@
 
 DyakonovAlex microservices repository
 
+## Homework 19 Логирование и распределенная трассировка
+
+### Подготовка окружения
+
+```bash
+export GOOGLE_PROJECT=docker-232609
+
+docker-machine create --driver google \
+    --google-machine-image https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/family/ubuntu-1604-lts \
+    --google-machine-type n1-standard-1 \
+    --google-open-port 5601/tcp \
+    --google-open-port 9292/tcp \
+    --google-open-port 9411/tcp \
+    logging
+
+# configure local env
+eval $(docker-machine env logging)
+
+# узнаем IP адрес
+docker-machine ip logging # 35.224.69.78
+```
+
+- Обновлён код приложений для работы с логгированием. Пересобраны образы.  
+- Добавлен ```docker-compose-logging.yml```
+- Добавлен ```dockerfile``` для fleuntd.
+- Добавлен ```logging/fluentd/fluent.conf```
+- Собран образ.  
+
+```bash
+export USER_NAME=happydyakonov
+docker build -t $USER_NAME/fluentd .
+```
+
+### Структурированные логи
+
+- Запущены сервисы приложения
+
+```bash
+docker-compose up -d
+```
+
+- Выполните команду для просмотра логов post сервиса
+
+```bash
+docker-compose logs -f post
+```
+
+- Определен драйвер для логирования для сервиса post внутри compose-файла
+- Поднята инфраструктура централизованной системы логирования и перезапущены сервисы приложения
+
+```bash
+gcloud compute firewall-rules create elasticsearch-default --allow tcp:9200
+gcloud compute firewall-rules create kibana-default --allow tcp:5601
+gcloud compute firewall-rules create fluentd-default --allow tcp:24224,udp
+docker-compose -f docker-compose-logging.yml up -d
+docker-compose down
+docker-compose up -d
+```
+
+- Запущены сервисы логирования (логин/пароль к kibana: admin/admin).  
+- Добавлен индекс fluentd. Добавлен фильтр для парсинга json логов, приходящих от post сервиса.  
+
+### Неструктурированные логи  
+
+- Сервис ui переключен на fluentd-драйвер. Добавлено регулярное выражение для парсинга лога.  
+- Парсинг переключен на grok.  
+
+### Распределенный трейсинг  
+
+- Добавлен в compose-файл для сервисов логирования сервис распределенного трейсинга [Zipkin](https://github.com/openzipkin/zipkin)  
+
 ## Homework 18 Мониторинг приложения и инфраструктуры
 
 ### Подготовка окружения
