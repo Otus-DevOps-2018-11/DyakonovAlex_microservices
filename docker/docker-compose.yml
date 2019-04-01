@@ -14,10 +14,31 @@ services:
     image: ${USER_NAME}/ui:${UI_VERSION}
     ports:
       - ${UI_PORT}:${UI_PORT}/tcp
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: 172.17.0.1:24224
+        tag: service.ui
+    environment:
+      - ZIPKIN_ENABLED=${ZIPKIN_ENABLED}
+    networks:
+      - front_net    
     networks:
       - front_net
   post:
     image: ${USER_NAME}/post:${POST_VERSION}
+    environment:
+      - POST_DATABASE_HOST=post_db
+      - POST_DATABASE=posts
+    depends_on:
+      - post_db
+    ports:
+      - "5000:5000"
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224
+        tag: service.post
     networks:
       back_net:
         aliases:
