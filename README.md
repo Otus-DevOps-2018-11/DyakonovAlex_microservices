@@ -2,6 +2,13 @@
 
 DyakonovAlex microservices repository
 
+## Homework 20 Введение в Kubernetes
+
+- Добавлены Deployment манифесты для запуска приложения в kubernetes.  
+- Пройден [Kubernetes The Hard Way](https://github.com/kelseyhightower/kubernetes-the-hard-way).  
+- Проверено, что kubectl apply -f проходит по созданным до этого deployment-ам (ui, post, mongo, comment) и поды запускаются.
+- Все созданные в ходе прохождения THW файлы (кроме бинарных) помещены в папку kubernetes/the_hard_way.  
+
 ## Homework 19 Логирование и распределенная трассировка
 
 ### Подготовка окружения
