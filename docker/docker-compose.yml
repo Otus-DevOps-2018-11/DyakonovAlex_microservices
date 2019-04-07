@@ -22,8 +22,6 @@ services:
     environment:
       - ZIPKIN_ENABLED=${ZIPKIN_ENABLED}
     networks:
-      - front_net    
-    networks:
       - front_net
   post:
     image: ${USER_NAME}/post:${POST_VERSION}
